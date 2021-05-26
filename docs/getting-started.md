@@ -192,7 +192,7 @@ Create a project in Argo by running the following command
 
 ```
 argocd proj create sample \
-    -d https://kubernetes.default.svc
+    -d https://kubernetes.default.svc,argocd \
     -s https://github.com/kcoleman731/argo-apps.git
 ```
 

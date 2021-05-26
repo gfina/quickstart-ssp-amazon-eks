@@ -6,27 +6,25 @@ import * as ssp from '../../lib'
 // Team implementations
 import * as team from '../teams'
 
-export default class BottlerocketStack extends cdk.Stack {
-    constructor(app: cdk.App, id: string, props?: cdk.StackProps) {
-        super(app, id, props);
+export default class BottlerocketStack {
+    constructor(app: cdk.App, id: string) {
 
-        // Teams for the cluster.
-        const teams: Array<ssp.Team> = [
-            new team.TeamPlatform,
-        ];
+        // Setup platform team
+        const accountID = cdk.Stack.of(this).account
+        const platformTeam = new team.TeamPlatform(accountID)
+        const teams: Array<ssp.Team> = [platformTeam];
 
         // AddOns for the cluster.
         const addOns: Array<ssp.ClusterAddOn> = [
-            new ssp.NginxAddon,
-            new ssp.ArgoCDAddon,
-            new ssp.CalicoAddon,
-            new ssp.MetricsServerAddon,
-            new ssp.ClusterAutoScalerAddon,
+            new ssp.NginxAddOn,
+            new ssp.ArgoCDAddOn,
+            new ssp.CalicoAddOn,
+            new ssp.MetricsServerAddOn,
             new ssp.ContainerInsightsAddOn,
         ];
 
         const clusterProvider = new ssp.BottlerocketClusterProvider()
-        new ssp.EksBlueprint(app, { id: 'east-br-test', clusterProvider }, {
+        new ssp.EksBlueprint(app, { id, teams, addOns, clusterProvider }, {
             env: {
                 region: 'us-east-1'
             }

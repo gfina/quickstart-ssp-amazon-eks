@@ -7,33 +7,30 @@ import * as ssp from '../../lib'
 // Team implementations
 import * as team from '../teams'
 
-export default class CustomClusterStack extends cdk.Stack {
-    constructor(app: cdk.App, id: string, props?: cdk.StackProps) {
-        super(app, id, props);
-
-        // Teams for the cluster.
-        const teams: Array<ssp.Team> = [
-            new team.TeamPlatform,
-        ];
+export default class CustomClusterStack {
+    constructor(app: cdk.App, id: string) {
+        // Setup platform team
+        const accountID = cdk.Stack.of(this).account
+        const platformTeam = new team.TeamPlatform(accountID)
+        const teams: Array<ssp.Team> = [platformTeam];
 
         // AddOns for the cluster.
         const addOns: Array<ssp.ClusterAddOn> = [
-            new ssp.NginxAddon,
-            new ssp.ArgoCDAddon,
-            new ssp.CalicoAddon,
-            new ssp.MetricsServerAddon,
-            new ssp.ClusterAutoScalerAddon,
+            new ssp.NginxAddOn,
+            new ssp.ArgoCDAddOn,
+            new ssp.CalicoAddOn,
+            new ssp.MetricsServerAddOn,
             new ssp.ContainerInsightsAddOn,
         ];
 
         const clusterProps: ssp.EC2ProviderClusterProps = {
             version: eks.KubernetesVersion.V1_19,
-            instanceType: new ec2.InstanceType('t3.large'),
+            instanceTypes: [new ec2.InstanceType('t3.large')],
             amiType: eks.NodegroupAmiType.AL2_X86_64
         }
 
         const clusterProvider = new ssp.EC2ClusterProvider(clusterProps);
-        new ssp.EksBlueprint(app, { id: "test-cluster-provider", clusterProvider });
+        new ssp.EksBlueprint(app, { id, teams, addOns, clusterProvider });
     }
 }
 
